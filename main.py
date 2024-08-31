@@ -57,8 +57,13 @@ def is_collision(snake_pos, food_pos):
 def load_record():
     if os.path.exists(record_file):
         with open(record_file, "r") as f:
-            return int(f.read())
+            content = f.read().strip()  # Удаляем пробельные символы
+            if content:  # Если файл не пустой
+                return int(content)
+            else:  # Если файл пустой
+                return 0
     return 0
+
 
 
 # Function to save the high score to file
@@ -282,6 +287,8 @@ def game_loop(record):
                 if event.key == pygame.K_RETURN:
                     game_restart = True
                     game_loop(load_record())
+
+
 
 
 # Start the menu
