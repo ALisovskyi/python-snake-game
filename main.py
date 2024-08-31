@@ -3,65 +3,71 @@ import random
 import time
 import os
 
-# Инициализация Pygame
+# Initialize Pygame
 pygame.init()
 
-# Параметры экрана
+# Screen dimensions
 screen_width = 640
 screen_height = 480
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Python Snake Game')
 
-# Цвета
+# Colors
 black = (0, 0, 0)
 white = (255, 255, 255)
 red = (255, 0, 0)
-dark_green = (0, 100, 0)  # Темно-зеленый цвет для цифр
+dark_green = (0, 100, 0)  # Dark green color for digits
 
-# Параметры игры
+# Game parameters
 snake_block = 20
 snake_speed = 15
 
-# Шрифт
+# Fonts
 font_style = pygame.font.SysFont(None, 50)
 score_font = pygame.font.SysFont(None, 35)
 
-# Путь для сохранения рекорда
+# Path for saving the high score
 record_file = "record.txt"
 
-# Функция для отображения сообщения на экране
-def message(msg, color, position, angle=0):
-    mesg = font_style.render(msg, True, color)
-    rotated_mesg = pygame.transform.rotate(mesg, angle)
-    rect = rotated_mesg.get_rect(center=(position[0] + snake_block // 2, position[1] + snake_block // 2))
-    screen.blit(rotated_mesg, rect.topleft)
 
-# Функция для отображения очков
+# Function to display a message on the screen
+def message(msg, color, position, angle=0):
+    mes = font_style.render(msg, True, color)
+    rotated_msg = pygame.transform.rotate(mes, angle)
+    rect = rotated_msg.get_rect(center=(position[0] + snake_block // 2, position[1] + snake_block // 2))
+    screen.blit(rotated_msg, rect.topleft)
+
+
+# Function to display the score
 def show_score(score, record):
     value = score_font.render("Score: " + str(score), True, white)
     record_value = score_font.render("Record: " + str(record), True, white)
     screen.blit(value, [0, 0])
     screen.blit(record_value, [screen_width - 200, 0])
 
-# Функция для проверки столкновения
+
+# Function to check collision
 def is_collision(snake_pos, food_pos):
     snake_rect = pygame.Rect(snake_pos[0], snake_pos[1], snake_block, snake_block)
     food_rect = pygame.Rect(food_pos[0], food_pos[1], snake_block, snake_block)
     return snake_rect.colliderect(food_rect)
 
-# Функция для чтения рекорда из файла
+
+# Function to load the high score from file
 def load_record():
     if os.path.exists(record_file):
         with open(record_file, "r") as f:
             return int(f.read())
     return 0
 
-# Функция для сохранения рекорда в файл
+
+# Function to save the high score to file
 def save_record(record):
     with open(record_file, "w") as f:
         f.write(str(record))
 
-# Главное меню
+
+# Main menu
 def main_menu():
     record = load_record()
     menu = True
@@ -83,30 +89,34 @@ def main_menu():
                     menu = False
                     game_loop(record)
 
-# Основная функция игры
+
+# Main game function
 def game_loop(record):
-    # Начальные параметры змейки
+    # Initial snake parameters
     snake_pos = [100, 50]
-    snake_body = [['P', snake_pos[0], snake_pos[1], 0]]  # Сегмент: буква, x, y, угол
+    snake_body = [['P', snake_pos[0], snake_pos[1], 0]]  # Segment: letter, x, y, angle
     snake_direction = 'RIGHT'
     change_to = snake_direction
     score = 0
 
-    # Буквы-еда
+    # Food letters
     food_list = ['y', 't', 'h', 'o', 'n']
     food_index = 0
     food_pos = [random.randint(0, (screen_width - snake_block) // snake_block) * snake_block,
                 random.randint(0, (screen_height - snake_block) // snake_block) * snake_block]
 
-    # Хаотичный огонь
+    # Random fire
     fire_list = [['~', random.randint(0, (screen_width - snake_block) // snake_block) * snake_block,
                   random.randint(0, (screen_height - snake_block) // snake_block) * snake_block]]
 
     game_over = False
     game_continued = False
 
-    # Таймеры для цифр
+    # Timers for digits
     food_timer = []
+
+    # Initialize angle
+    angle = 0
 
     while not game_over:
         for event in pygame.event.get():
@@ -125,7 +135,7 @@ def game_loop(record):
 
         snake_direction = change_to
 
-        # Движение головы змейки
+        # Move the snake's head
         if snake_direction == 'LEFT':
             snake_pos[0] -= snake_block
             angle = 90
@@ -139,7 +149,7 @@ def game_loop(record):
             snake_pos[1] += snake_block
             angle = 180
 
-        # Проверка на выход за границы экрана и телепортация
+        # Check boundaries and teleport
         if snake_pos[0] >= screen_width:
             snake_pos[0] = 0
         elif snake_pos[0] < 0:
@@ -149,11 +159,11 @@ def game_loop(record):
         elif snake_pos[1] < 0:
             snake_pos[1] = screen_height - snake_block
 
-        # Обновление позиции тела змейки
+        # Update the snake's body position
         new_body = []
         for i in range(len(snake_body)):
             if i == 0:
-                new_body.append([snake_body[i][0], snake_pos[0], snake_pos[1], angle])  # Угол для головы
+                new_body.append([snake_body[i][0], snake_pos[0], snake_pos[1], angle])  # Head angle
             else:
                 prev_segment = snake_body[i - 1]
                 new_body.append([snake_body[i][0], prev_segment[1], prev_segment[2], prev_segment[3]])
@@ -161,7 +171,7 @@ def game_loop(record):
         snake_body = new_body
 
         if game_continued:
-            # Генерация новых "цифр-еды" если еще не на экране
+            # Generate new "digit-food" if not on screen
             if not food_pos:
                 food_pos = []
                 food_timer = []
@@ -169,39 +179,39 @@ def game_loop(record):
                     food_pos.append([random.randint(0, (screen_width - snake_block) // snake_block) * snake_block,
                                      random.randint(0, (screen_height - snake_block) // snake_block) * snake_block,
                                      random.choice("123456789")])
-                    # Устанавливаем таймер для каждой цифры
+                    # Set timer for each digit
                     food_timer.append(time.time() + random.randint(3, 5))
 
-            # Проверка на столкновение с цифрами
+            # Check collision with digits
             for i, food in enumerate(food_pos[:]):
                 if is_collision(snake_pos, food[:2]):
-                    score += int(food[2]) * 100  # Добавляем очки
-                    food_pos.pop(i)  # Убираем съеденную еду
-                    food_timer.pop(i)  # Убираем соответствующий таймер
+                    score += int(food[2]) * 100  # Add points
+                    food_pos.pop(i)  # Remove eaten food
+                    food_timer.pop(i)  # Remove corresponding timer
 
-            # Удаление еды по истечении времени
+            # Remove food after timer expires
             current_time = time.time()
             food_pos = [food for i, food in enumerate(food_pos) if current_time < food_timer[i]]
             food_timer = [timer for timer in food_timer if current_time < timer]
 
-        # Проверка на столкновение с "едой"
+        # Check collision with "food"
         if not game_continued and is_collision(snake_pos, food_pos):
-            # Добавляем новый сегмент с углом головы
+            # Add new segment with head angle
             snake_body.append([food_list[food_index], food_pos[0], food_pos[1], angle])
-            score += 1000  # Начисляем 1000 очков за каждую букву
+            score += 1000  # Award 1000 points for each letter
             food_index += 1
 
             if food_index < len(food_list):
                 food_pos = [random.randint(0, (screen_width - snake_block) // snake_block) * snake_block,
                             random.randint(0, (screen_height - snake_block) // snake_block) * snake_block]
-                # Добавляем новый огонь только в первой фазе
+                # Add new fire only in the first phase
                 fire_list.append(['~', random.randint(0, (screen_width - snake_block) // snake_block) * snake_block,
                                   random.randint(0, (screen_height - snake_block) // snake_block) * snake_block])
             else:
-                game_continued = True  # Начало второй фазы игры
+                game_continued = True  # Start the second phase of the game
                 food_pos = []
 
-        # Обновление огня
+        # Update fire
         for fire in fire_list:
             direction = random.choice(['LEFT', 'RIGHT', 'UP', 'DOWN'])
             if direction == 'LEFT':
@@ -213,7 +223,7 @@ def game_loop(record):
             elif direction == 'DOWN':
                 fire[2] += snake_block
 
-            # Проверка на выход за границы экрана и телепортация
+            # Check boundaries and teleport
             if fire[1] >= screen_width:
                 fire[1] = 0
             elif fire[1] < 0:
@@ -223,39 +233,39 @@ def game_loop(record):
             elif fire[2] < 0:
                 fire[2] = screen_height - snake_block
 
-            # Проверка на столкновение с огнем
+            # Check collision with fire
             if is_collision(snake_pos, fire[1:]):
                 game_over = True
 
         screen.fill(black)
 
-        # Рисуем змейку
+        # Draw the snake
         for segment in snake_body:
             letter, x, y, angle = segment
             message(letter, white, [x + snake_block // 2, y + snake_block // 2], angle=angle)
 
-        # Рисуем текущую "еду"
+        # Draw current "food"
         if game_continued:
             for food in food_pos:
                 message(food[2], dark_green, [food[0] + snake_block // 2, food[1] + snake_block // 2])
         else:
             message(food_list[food_index], white, [food_pos[0] + snake_block // 2, food_pos[1] + snake_block // 2])
 
-        # Рисуем огонь
+        # Draw fire
         for fire in fire_list:
             message('~', red, [fire[1] + snake_block // 2, fire[2] + snake_block // 2])
 
-        # Рисуем очки
+        # Draw the score
         show_score(score, record)
 
         pygame.display.update()
         pygame.time.Clock().tick(snake_speed)
 
-    # Обновляем рекорд, если текущий счет больше
+    # Update high score if current score is higher
     if score > record:
         save_record(score)
 
-    # Завершение игры
+    # Game over
     screen.fill(black)
     message("Game Over", white, [screen_width // 2, screen_height // 3])
     message(f"Score: {score}", white, [screen_width // 2, screen_height // 2])
@@ -273,5 +283,6 @@ def game_loop(record):
                     game_restart = True
                     game_loop(load_record())
 
-# Запуск меню
+
+# Start the menu
 main_menu()
