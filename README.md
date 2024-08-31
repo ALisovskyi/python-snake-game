@@ -23,4 +23,4 @@ This is a Python-based Snake game with a unique approach to the classic gameplay
 Here are some screenshots of the project:
 
 ![Score&playagain](Images/Score&playagain.png)
-![Gameplay](Images/gameplay.png)
+![Gameplay](Images/gameplay.jpg)
